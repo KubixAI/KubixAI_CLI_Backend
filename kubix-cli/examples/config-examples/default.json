@@ -1,0 +1,39 @@
+{
+  "// Configuration file for Kubix CLI": "",
+  "// This is the default configuration template": "",
+
+  "model": "deepseek/deepseek-chat",
+
+  "cuda": {
+    "default_gpu": "sm_70",
+    "auto_compile": true,
+    "auto_benchmark": false,
+    "cache_optimizations": true,
+    "optimization_level": 3
+  },
+
+  "ui": {
+    "theme": "nvidia-green",
+    "compact_mode": true,
+    "show_tool_calls": true,
+    "streaming": true,
+    "banner": true
+  },
+
+  "permission": {
+    "edit": "allow",
+    "bash": {
+      "*": "allow"
+    },
+    "webfetch": "allow"
+  },
+
+  "tools": {
+    "read_file": true,
+    "write_file": true,
+    "compile_cuda": true,
+    "analyze_cuda": true,
+    "bash": true,
+    "list_files": true
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "// Safe Configuration": "",
+  "// Maximum safety - always asks for confirmation": "",
+
+  "model": "deepseek/deepseek-chat",
+
+  "cuda": {
+    "auto_compile": false,
+    "auto_benchmark": false
+  },
+
+  "permission": {
+    "edit": "ask",
+    "bash": {
+      "*": "ask",
+      "rm *": "deny",
+      "git push *": "ask",
+      "nvcc *": "allow"
+    },
+    "webfetch": "ask"
+  }
+}

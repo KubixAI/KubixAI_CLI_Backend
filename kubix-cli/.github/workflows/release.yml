@@ -1,0 +1,88 @@
+name: Release and Publish
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., 1.0.0)'
+        required: true
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install build twine setuptools wheel
+
+    - name: Extract version
+      id: version
+      run: |
+        if [[ "${{ github.event_name }}" == "push" ]]; then
+          VERSION=${GITHUB_REF#refs/tags/v}
+        else
+          VERSION="${{ github.event.inputs.version }}"
+        fi
+        echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+        echo "Version: $VERSION"
+
+    - name: Update version in setup.py
+      run: |
+        sed -i "s/version=\".*\"/version=\"${{ steps.version.outputs.VERSION }}\"/" setup.py
+
+    - name: Build package
+      run: |
+        python -m build
+        ls -la dist/
+
+    - name: Publish to PyPI
+      if: github.event_name == 'push' || github.event.inputs.version != ''
+      env:
+        TWINE_USERNAME: __token__
+        TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+      run: |
+        python -m twine upload dist/* --verbose
+
+    - name: Create GitHub Release
+      if: github.event_name == 'push'
+      uses: softprops/action-gh-release@v1
+      with:
+        files: dist/*
+        generate_release_notes: true
+        draft: false
+        prerelease: false
+        body: |
+          ## Installation
+
+          ### Install via pip:
+          ```bash
+          pip install kubix-cli
+          ```
+
+          ### Install via curl (Linux/macOS):
+          ```bash
+          curl -sSL https://raw.githubusercontent.com/Kubix-AI/kubix-cli/main/install.sh | bash
+          ```
+
+          ### Install via PowerShell (Windows):
+          ```powershell
+          irm https://raw.githubusercontent.com/Kubix-AI/kubix-cli/main/install.ps1 | iex
+          ```
+
+          ## What's Changed
+          See the full changelog below.

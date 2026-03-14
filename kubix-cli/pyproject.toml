@@ -1,0 +1,78 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kubix-cli"
+version = "1.0.0"
+description = "Kubix CLI - GPU-Native AI Code Editor for CUDA development"
+readme = "README.md"
+authors = [{name = "Kubix AI", email = "hello@kubix.ai"}]
+license = {text = "Proprietary"}
+requires-python = ">=3.9"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: Other/Proprietary License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Code Generators",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: System :: Hardware :: Symmetric Multi-processing",
+]
+keywords = ["gpu", "cuda", "optimization", "kernel", "ai", "performance", "kubix", "code-editor", "nvidia", "assistant"]
+dependencies = [
+    "pydantic==2.12.0",
+    "backoff>=2.2.1",
+    "requests>=2.31.0",
+    "rich>=13.5.0",
+    "prompt-toolkit>=3.0.0",
+    "pygments>=2.15.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-mock>=3.11.0",
+    "black>=23.0.0",
+    "isort>=5.12.0",
+    "mypy>=1.0.0"
+]
+
+[project.urls]
+Homepage = "https://kubix.ai"
+"Bug Tracker" = "https://github.com/Kubix-AI/kubix-cli/issues"
+"Documentation" = "https://docs.kubix.ai/cli"
+
+[project.scripts]
+kubix = "kubix_cli.cli_minimal:main"
+kubix-cli = "kubix_cli.cli_minimal:main"
+
+[tool.setuptools.packages.find]
+include = ["kubix_cli*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short"
+
+[tool.black]
+line-length = 100
+target-version = ['py38', 'py39', 'py310', 'py311']
+
+[tool.isort]
+profile = "black"
+line_length = 100
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+ignore_missing_imports = true

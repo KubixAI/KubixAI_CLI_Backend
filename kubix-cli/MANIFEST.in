@@ -1,0 +1,30 @@
+# Include package data
+include README.md
+include LICENSE
+include pyproject.toml
+
+# Include configuration templates
+recursive-include rightnow_cli/config *.json
+recursive-include rightnow_cli/ui *.json
+
+# Include examples (for documentation)
+recursive-include examples *.cu *.cuh *.py *.json
+
+# Exclude unnecessary files
+global-exclude *.pyc
+global-exclude __pycache__
+global-exclude *.pyo
+global-exclude *.pyd
+global-exclude .DS_Store
+global-exclude *.so
+global-exclude *.dylib
+global-exclude *.dll
+global-exclude .git*
+global-exclude *.swp
+global-exclude *~
+
+# Exclude test and development files
+prune tests
+prune docs
+prune backup_unused_files
+prune delete_docs

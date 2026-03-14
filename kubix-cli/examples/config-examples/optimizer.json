@@ -1,0 +1,35 @@
+{
+  "// Optimizer Configuration": "",
+  "// Specialized for CUDA kernel optimization with premium models": "",
+
+  "model": "anthropic/claude-3.5-sonnet",
+
+  "agents": {
+    "optimizer": {
+      "description": "Specialized CUDA kernel optimizer",
+      "model": "anthropic/claude-3.5-sonnet",
+      "temperature": 0.2,
+      "max_tokens": 4000,
+      "tools": {
+        "bash": false
+      },
+      "mode": "primary"
+    }
+  },
+
+  "cuda": {
+    "default_gpu": "sm_86",
+    "auto_compile": true,
+    "auto_benchmark": true,
+    "cache_optimizations": true,
+    "optimization_level": 3
+  },
+
+  "permission": {
+    "edit": "allow",
+    "bash": {
+      "*": "deny"
+    },
+    "webfetch": "allow"
+  }
+}
