@@ -1,0 +1,43 @@
+# Example using self-hosted GPU runner
+# For teams with their own GPU machines running GitHub Actions runner
+
+name: GPU Tests (Self-Hosted)
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  gpu-test:
+    # Use self-hosted runner with GPU
+    runs-on: [self-hosted, gpu, cuda]
+    name: Test on Local GPU
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install kubix_ci
+        run: pip install kubix_ci
+
+      - name: Check GPU
+        run: nvidia-smi
+
+      - name: Run local GPU test
+        run: |
+          # For self-hosted runner, can test directly without SSH
+          # Compile and run kernel locally
+          nvcc -O3 -o test_kernel kernels/matmul.cu
+          ./test_kernel
+
+      # Or use kubix_ci with local target
+      - name: Run kubix_ci (SSH to other machines)
+        run: kubix_ci test kernels/*.cu --config kubix_ci.yml
+        env:
+          # SSH key can be pre-installed on self-hosted runner
+          SSH_AUTH_SOCK: ${{ env.SSH_AUTH_SOCK }}

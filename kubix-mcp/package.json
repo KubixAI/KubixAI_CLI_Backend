@@ -1,0 +1,64 @@
+{
+  "name": "@kubix/kubix-mcp",
+  "version": "1.0.2",
+  "description": "MCP server for Kubix GPU kernel optimization — generate and optimize Triton/CUDA kernels on real H100/A100 GPUs from any AI coding agent",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "kubix-mcp": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsx src/index.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "open": "^10.1.0",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "tsup": "^8.3.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "dist",
+    "bin"
+  ],
+  "keywords": [
+    "mcp",
+    "mcp-server",
+    "model-context-protocol",
+    "kubix-mcp",
+    "gpu",
+    "kernel",
+    "optimization",
+    "cuda",
+    "triton",
+    "claude-code",
+    "opencode",
+    "cursor",
+    "windsurf",
+    "h100",
+    "a100",
+    "pytorch",
+    "machine-learning",
+    "deep-learning"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Kubix-AI/kubix-mcp.git"
+  },
+  "homepage": "https://github.com/Kubix-AI/kubix-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/Kubix-AI/kubix-mcp/issues"
+  },
+  "mcpName": "io.github.Kubix-AI/kubix-mcp",
+  "author": "Kubix AI <hello@kubix.ai> (https://kubix.ai)",
+  "license": "MIT"
+}

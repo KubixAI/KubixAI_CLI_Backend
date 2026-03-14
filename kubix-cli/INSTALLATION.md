@@ -58,7 +58,7 @@ For the latest development version:
 
 ```bash
 # Clone the repository
-git clone https://github.com/Kubix-AI/kubix-cli.git
+git clone [url]
 cd kubix-cli
 
 # Install the package

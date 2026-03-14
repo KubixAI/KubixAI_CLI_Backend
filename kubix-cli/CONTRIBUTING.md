@@ -7,7 +7,7 @@ Thank you for your interest in contributing to Kubix CLI! We welcome contributio
 1. Fork the repository
 2. Clone your fork:
    ```bash
-   git clone https://github.com/Kubix-AI/kubix-cli.git
+   git clone [url]
    cd kubix-cli
    ```
 

@@ -1,0 +1,58 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kubix-ci"
+version = "0.1.1"
+description = "Test CUDA kernels across multiple GPUs via SSH"
+readme = "README.md"
+authors = [{name = "Kubix AI", email = "hello@kubix.ai"}]
+license = "PolyForm-Noncommercial-1.0.0"
+requires-python = ">=3.9"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Testing",
+    "Topic :: System :: Hardware :: Symmetric Multi-processing",
+]
+keywords = ["gpu", "cuda", "testing", "ssh", "nvidia", "benchmark", "ci", "ml", "deep-learning"]
+dependencies = [
+    "click>=8.0",
+    "paramiko>=3.0",
+    "pyyaml>=6.0",
+    "rich>=13.0",
+    "httpx>=0.24.0",
+]
+
+[project.optional-dependencies]
+# Cloud provider SDKs
+runpod = ["runpod>=1.0"]
+vastai = ["vastai-sdk>=0.1.0"]
+
+# All cloud providers
+cloud = [
+    "kubix_ci[runpod]",
+    "kubix_ci[vastai]",
+]
+
+[project.urls]
+Homepage = "https://kubix.ai"
+Documentation = "https://docs.kubix.ai/ci"
+Repository = "https://github.com/Kubix-AI/kubix-ci"
+Issues = "https://github.com/Kubix-AI/kubix-ci/issues"
+Changelog = "https://github.com/Kubix-AI/kubix-ci/blob/main/CHANGELOG.md"
+
+[project.scripts]
+kubix-ci = "kubix_ci.cli:cli"
+
+[tool.setuptools.packages.find]
+include = ["kubix_ci*"]

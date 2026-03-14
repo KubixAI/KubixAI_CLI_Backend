@@ -1,0 +1,48 @@
+# Advanced workflow example with multiple GPU targets and matrix strategy
+
+name: GPU Kernel Tests (Advanced)
+
+on:
+  pull_request:
+    paths:
+      - '**/*.cu'
+      - '**/*.cuh'
+
+jobs:
+  # Test on different GPU types in parallel
+  gpu-matrix:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [h100, a100, rtx4090]
+
+    name: Test on ${{ matrix.target }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Test kernel on ${{ matrix.target }}
+        uses: kubix-ai/kubix_ci@v1
+        with:
+          kernel: 'src/kernels/*.cu'
+          target: ${{ matrix.target }}
+          ssh-key: ${{ secrets.GPU_SSH_KEY }}
+          runs: '20'
+          warmup: '5'
+
+  # Aggregate results
+  report:
+    needs: gpu-matrix
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+      - name: Check results
+        run: |
+          if [ "${{ needs.gpu-matrix.result }}" = "success" ]; then
+            echo "All GPU tests passed!"
+          else
+            echo "Some GPU tests failed"
+            exit 1
+          fi

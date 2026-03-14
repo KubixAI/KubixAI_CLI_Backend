@@ -1,0 +1,71 @@
+name: Release
+
+# Tag patterns:
+#   v1.0.0  = Production release (npm publish)
+#   tv1.0.0 = Test release (NO npm publish)
+
+on:
+  push:
+    tags:
+      - 'v*'
+      - 'tv*'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  release:
+    name: Build & Publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Build
+        run: npm run build
+
+      - name: Verify build output
+        run: |
+          test -f dist/index.js || (echo "dist/index.js not found" && exit 1)
+          echo "Build verified"
+
+      - name: Update version from tag
+        run: |
+          VERSION=${{ github.ref_name }}
+          VERSION=${VERSION#v}
+          VERSION=${VERSION#tv}
+          npm version $VERSION --no-git-tag-version --allow-same-version
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          draft: false
+          prerelease: ${{ contains(github.ref_name, '-') || startsWith(github.ref_name, 'tv') }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish to npm
+        if: ${{ startsWith(github.ref_name, 'v') && !startsWith(github.ref_name, 'tv') }}
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

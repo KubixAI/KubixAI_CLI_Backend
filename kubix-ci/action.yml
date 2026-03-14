@@ -1,0 +1,179 @@
+name: 'kubix_ci - GPU Kernel Testing'
+description: 'Test CUDA kernels across multiple GPUs via SSH'
+author: 'Kubix AI'
+branding:
+  icon: 'cpu'
+  color: 'green'
+
+inputs:
+  kernel:
+    description: 'Path to CUDA kernel file(s). Supports glob patterns.'
+    required: true
+  config:
+    description: 'Path to kubix_ci.yml config file'
+    required: false
+    default: 'kubix_ci.yml'
+  target:
+    description: 'Filter to specific target(s) by name or GPU type'
+    required: false
+  runs:
+    description: 'Number of benchmark iterations'
+    required: false
+    default: '10'
+  warmup:
+    description: 'Number of warmup iterations'
+    required: false
+    default: '3'
+  ssh-key:
+    description: 'SSH private key for connecting to GPU machines'
+    required: false
+  brev-token:
+    description: 'Brev.dev API token (if using Brev provider)'
+    required: false
+  post-comment:
+    description: 'Post results as PR comment (true/false)'
+    required: false
+    default: 'true'
+  fail-on-error:
+    description: 'Fail the workflow if any GPU test fails'
+    required: false
+    default: 'true'
+
+outputs:
+  results:
+    description: 'JSON results from kubix_ci'
+    value: ${{ steps.run-kubix_ci.outputs.results }}
+  passed:
+    description: 'Whether all tests passed (true/false)'
+    value: ${{ steps.run-kubix_ci.outputs.passed }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install kubix_ci
+      shell: bash
+      run: |
+        pip install kubix_ci
+        kubix_ci --version
+
+    - name: Setup SSH key
+      if: inputs.ssh-key != ''
+      shell: bash
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ inputs.ssh-key }}" > ~/.ssh/kubix_ci_key
+        chmod 600 ~/.ssh/kubix_ci_key
+        # Add to ssh-agent
+        eval "$(ssh-agent -s)"
+        ssh-add ~/.ssh/kubix_ci_key
+
+    - name: Setup Brev CLI
+      if: inputs.brev-token != ''
+      shell: bash
+      run: |
+        curl -fsSL https://raw.githubusercontent.com/brevdev/brev-cli/main/bin/install-latest.sh | bash
+        echo "${{ inputs.brev-token }}" | brev login --token
+
+    - name: Run kubix_ci tests
+      id: run-kubix_ci
+      shell: bash
+      run: |
+        set +e  # Don't exit on error, we handle it
+
+        # Build command
+        CMD="kubix_ci test ${{ inputs.kernel }}"
+        CMD="$CMD --config ${{ inputs.config }}"
+        CMD="$CMD --runs ${{ inputs.runs }}"
+        CMD="$CMD --warmup ${{ inputs.warmup }}"
+
+        if [ -n "${{ inputs.target }}" ]; then
+          CMD="$CMD --target ${{ inputs.target }}"
+        fi
+
+        # Run and capture output
+        OUTPUT=$(eval $CMD 2>&1)
+        EXIT_CODE=$?
+
+        echo "$OUTPUT"
+
+        # Save output for comment
+        echo "results<<EOF" >> $GITHUB_OUTPUT
+        echo "$OUTPUT" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+
+        if [ $EXIT_CODE -eq 0 ]; then
+          echo "passed=true" >> $GITHUB_OUTPUT
+        else
+          echo "passed=false" >> $GITHUB_OUTPUT
+        fi
+
+        # Fail if configured to do so
+        if [ "${{ inputs.fail-on-error }}" = "true" ] && [ $EXIT_CODE -ne 0 ]; then
+          exit $EXIT_CODE
+        fi
+
+    - name: Post PR comment
+      if: inputs.post-comment == 'true' && github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const results = `${{ steps.run-kubix_ci.outputs.results }}`;
+          const passed = '${{ steps.run-kubix_ci.outputs.passed }}' === 'true';
+
+          const status = passed ? '✅ All GPU tests passed' : '❌ Some GPU tests failed';
+
+          const body = `## GPU Kernel Test Results
+
+          ${status}
+
+          <details>
+          <summary>Full Results</summary>
+
+          \`\`\`
+          ${results}
+          \`\`\`
+
+          </details>
+
+          ---
+          *Tested with [kubix_ci](https://github.com/kubix-ai/kubix_ci)*`;
+
+          // Find existing comment
+          const { data: comments } = await github.rest.issues.listComments({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+          });
+
+          const botComment = comments.find(c =>
+            c.user.type === 'Bot' && c.body.includes('GPU Kernel Test Results')
+          );
+
+          if (botComment) {
+            // Update existing comment
+            await github.rest.issues.updateComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: botComment.id,
+              body: body
+            });
+          } else {
+            // Create new comment
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: body
+            });
+          }
+
+    - name: Cleanup SSH key
+      if: always() && inputs.ssh-key != ''
+      shell: bash
+      run: |
+        rm -f ~/.ssh/kubix_ci_key

@@ -1,0 +1,20 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.Kubix-AI/kubix-mcp",
+  "description": "Turn PyTorch into fast CUDA/Triton kernels on real datacenter GPUs with up to 14x speedup.",
+  "repository": {
+    "url": "https://github.com/Kubix-AI/kubix-mcp",
+    "source": "github"
+  },
+  "version": "1.0.2",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "@kubix/kubix-mcp",
+      "version": "1.0.2",
+      "transport": {
+        "type": "stdio"
+      }
+    }
+  ]
+}
