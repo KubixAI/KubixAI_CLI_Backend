@@ -39,7 +39,7 @@ These engineers are among the rarest in tech. **Top GPU engineers at NVIDIA and 
 
 ### AI Changes the Cost Function
 
-AI agents can now run the same profile → diagnose → patch → verify loop that human GPU engineers run — at a fraction of the cost and time. A $600 compute run can find and implement optimizations that pay back in hours. **Kubix.ai is the infrastructure that makes this possible.**
+AI agents can now run the same profile → diagnose → patch → verify loop that human GPU engineers run — at a fraction of the cost and time. A few $$ compute run can find and implement optimizations that pay back in hours. **Kubix.ai is the infrastructure that makes this possible.**
 
 ---
 
